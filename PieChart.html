@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        canvas {
+            border: 1px solid #eee;
+            display: block;
+            margin: 100px auto;
+        }
+    </style>
+</head>
+<body>
+<canvas width="600" height="400"></canvas>
+<script>
+    var pieChart = function () {
+        this.ctx = document.querySelector('canvas').getContext('2d');
+        this.w = this.ctx.canvas.width;
+        this.h = this.ctx.canvas.height;
+        this.x0 = this.w / 2 + 50;
+        this.y0 = this.h / 2;
+        this.radius = 150;
+        this.out = 30;
+        this.space = 20;
+        this.rectW = 10;
+        this.rectH = 10;
+
+    }
+    pieChart.prototype.drawPie = function (data) {
+        var that = this;
+        var angleList = [];
+        var total = 0;
+        data.forEach(function (item, i) {
+            total = total + item.num;
+        });
+        data.forEach(function (item, i) {
+            var angle = Math.PI * 2 * (item.num / total);
+            item.angle = angle;
+            // console.log(item)
+            angleList.push(angle);
+        });
+
+        var startAngle = 0;
+        data.forEach(function (item, i) {
+            var endAngle = startAngle + item.angle;
+            that.ctx.beginPath();
+            that.ctx.moveTo(that.x0, that.y0);
+            that.ctx.arc(that.x0, that.y0, that.radius, startAngle, endAngle);
+            that.ctx.fillStyle = that.getRandomColor();
+            var color = that.ctx.fillStyle;
+            // console.log(that.ctx.fillStyle)
+            that.ctx.fill();
+            that.drawTitle(startAngle, item.angle, color, item.title);
+            that.drawDiscription(i, item.title);
+            startAngle = endAngle;
+        })
+
+    }
+    pieChart.prototype.getRandomColor = function () {
+        var r = Math.floor(Math.random() * 256);
+        var g = Math.floor(Math.random() * 256);
+        var b = Math.floor(Math.random() * 256);
+        return 'rgb(' + r + ',' + g + ',' + b + ')';
+    }
+    pieChart.prototype.drawTitle = function (startAngle, angle, color, title) {
+        var edge = this.radius + this.out;
+        var edgeX = Math.cos(startAngle + angle / 2) * edge;
+        var edgeY = Math.sin(startAngle + angle / 2) * edge;
+        var outX = this.x0 + edgeX;
+        var outY = this.y0 + edgeY;
+        // console.log(outX, outY)
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.x0, this.y0);
+        this.ctx.lineTo(outX, outY);
+        this.ctx.strokeStyle = color;
+
+
+        this.ctx.font = '14px Microsoft Yahei';
+        var txtLen = this.ctx.measureText(title).width;
+        if (outX > this.x0) {
+            this.ctx.lineTo(outX + txtLen, outY);
+            this.ctx.textAlign = 'left';
+        } else {
+            this.ctx.lineTo(outX - txtLen, outY);
+            this.ctx.textAlign = 'right';
+        }
+        this.ctx.textBaseline = 'bottom';
+        this.ctx.fillText(title, outX, outY);
+        this.ctx.stroke();
+
+    }
+    pieChart.prototype.drawDiscription = function (index, title) {
+        this.ctx.fillRect(this.space, this.space + index * (this.rectH + 10), this.rectW, this.rectH);
+        this.ctx.beginPath();
+        this.ctx.textAlign = 'left';
+        this.ctx.textBaseline = 'top';
+        this.ctx.font = '13px Microsoft Yahei';
+        this.ctx.fillText(title, this.space + this.rectW + 10, this.space + index * (this.rectH + 10));
+    }
+    var data = [
+        {
+            title: '1-10',
+            num: 11
+        },
+        {
+            title: '11-20',
+            num: 16
+        },
+        {
+            title: '21-30',
+            num: 3
+        },
+        {
+            title: '31-40',
+            num: 7
+        },
+        {
+            title: '41-50',
+            num: 19
+        }
+    ]
+    var pie = new pieChart();
+    pie.drawPie(data);
+</script>
+</body>
+</html>
